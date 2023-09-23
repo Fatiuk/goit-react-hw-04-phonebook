@@ -17,6 +17,7 @@ const initialContacts = [
 ];
 
 const App = () => {
+  // State
   const [contacts, setContacts] = useState(
     () => JSON.parse(localStorage.getItem('contacts')) ?? initialContacts
   );
