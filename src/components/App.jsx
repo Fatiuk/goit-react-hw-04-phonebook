@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
 import Notiflix from 'notiflix';
 // ============ Section ============
 import Section from './Section/Section';
@@ -9,32 +9,27 @@ import Filter from './Filter/Filter';
 // ============ ContactList ============
 import ContactList from './ContatctList/ContactList';
 
-export default class App extends Component {
-  state = {
-    contacts: [],
-    filter: '',
-  };
+const initialContacts = [
+  { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
+  { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
+  { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
+  { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
+];
 
-  componentDidMount() {
-    const localContacts = localStorage.getItem('contacts');
-    const parsedContacts = JSON.parse(localContacts);
-    // Load contacts from local storage on component mounting.
-    if (parsedContacts) {
-      this.setState({ contacts: parsedContacts });
-    }
-  }
+const App = () => {
+  const [contacts, setContacts] = useState(
+    () => JSON.parse(localStorage.getItem('contacts')) ?? initialContacts
+  );
+  const [filter, setFilter] = useState('');
 
-  componentDidUpdate(prevProps, prevState) {
-    // Save contacts to local storage when they change.
-    if (this.state.contacts !== prevState.contacts) {
-      localStorage.setItem('contacts', JSON.stringify(this.state.contacts));
-    }
-  }
+  useEffect(() => {
+    localStorage.setItem('contacts', JSON.stringify(contacts));
+  }, [contacts]);
 
   // The method that adds a new contact to the list of contacts
-  addContact = newContact => {
+  const addContact = newContact => {
     // Check if a contact with the same name already exists
-    const isExist = this.state.contacts.find(el => el.name === newContact.name);
+    const isExist = contacts.find(el => el.name === newContact.name);
     // If the contact already exists, display a warning
     if (isExist)
       return Notiflix.Report.warning(
@@ -43,42 +38,39 @@ export default class App extends Component {
         'Okay'
       );
     // If the contact doesn't exist, add it to the list of contacts
-    this.setState(prevState => ({
-      contacts: [...prevState.contacts, newContact],
+    setContacts(prevContacts => ({
+      contacts: [...prevContacts, newContact],
     }));
   };
   // The method that deletes the contact by its ID
-  deleteContact = contactId => {
-    this.setState(prevState => ({
-      contacts: prevState.contacts.filter(contact => contact.id !== contactId),
-    }));
+  const deleteContact = contactId => {
+    console.log(contactId);
+    setContacts(prevContacts =>
+      prevContacts.filter(contact => contact.id !== contactId)
+    );
   };
   // The method that updates the value of the filter
-  changeFilter = event => {
-    this.setState({
-      filter: event.target.value,
-    });
+  const changeFilter = event => {
+    setFilter(event.target.value);
   };
   // The method that returns the filtered list of contacts
-  filteredContacts = () => {
-    const { contacts, filter } = this.state;
+  const filteredContacts = () => {
     return contacts.filter(contact =>
       contact.name.toLowerCase().includes(filter.toLowerCase().trim())
     );
   };
 
-  render() {
-    const { filter } = this.state;
-    return (
-      <Section title="📚 Phonebook 📞">
-        <ContactForm onSubmit={this.addContact}></ContactForm>
-        <h2>Contacts</h2>
-        <Filter filter={filter} onChange={this.changeFilter}></Filter>
-        <ContactList
-          contacts={this.filteredContacts()}
-          handleDeleteContact={this.deleteContact}
-        ></ContactList>
-      </Section>
-    );
-  }
-}
+  return (
+    <Section title="📚 Phonebook 📞">
+      <ContactForm onSubmit={addContact}></ContactForm>
+      <h2>Contacts</h2>
+      <Filter filter={filter} onChange={changeFilter}></Filter>
+      <ContactList
+        contacts={filteredContacts()}
+        handleDeleteContact={deleteContact}
+      ></ContactList>
+    </Section>
+  );
+};
+
+export default App;
