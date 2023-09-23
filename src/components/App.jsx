@@ -38,13 +38,10 @@ const App = () => {
         'Okay'
       );
     // If the contact doesn't exist, add it to the list of contacts
-    setContacts(prevContacts => ({
-      contacts: [...prevContacts, newContact],
-    }));
+    setContacts(prevContacts => [...prevContacts, newContact]);
   };
   // The method that deletes the contact by its ID
   const deleteContact = contactId => {
-    console.log(contactId);
     setContacts(prevContacts =>
       prevContacts.filter(contact => contact.id !== contactId)
     );
